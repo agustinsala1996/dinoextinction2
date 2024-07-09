@@ -89,7 +89,7 @@ export default class Game extends Phaser.Scene {
     this.enemySpeed = 80;
     this.bossSpeed = 20;
     this.maxSpeed = 80;
-    this.scoreText = this.add.text(16, 16, "Puntuación: 0", {
+    this.scoreText = this.add.text(16, 16, "Score: 0", {
       fontSize: "32px",
       fill: "#FFF",
     });
@@ -129,7 +129,7 @@ export default class Game extends Phaser.Scene {
           enemigo.destroy(); // Elimina al enemigo si el personaje está atacando
           this.score += this.enemyScore.enemigo.points; // Aumenta la puntuación
           this.enemyScore.enemigo.count++;
-          this.scoreText.setText(`Puntuación: ${this.score}`); // Actualiza el texto de la puntuación
+          this.scoreText.setText(`Score: ${this.score}`); // Actualiza el texto de la puntuación
         } else {
           this.gameOver = true; // Termina el juego o reduce la vida del personaje
         }

@@ -16,7 +16,7 @@ export default class Game extends Phaser.Scene {
     //fondo
     this.load.image("fondo", "./public/assets/fondo.png");
 
-    //personaje SE VE MAL
+    //personaje 
     this.load.image("personaje", "./public/assets/tercero.png");
 
     //enemigo
@@ -46,8 +46,7 @@ export default class Game extends Phaser.Scene {
     this.boss = this.physics.add.sprite(0, 800, "boss");
     this.boss.setScale(0.4);
 
-    //colision entre personaje y enemigos
-    //this.physics.add.collider(this.personaje, this.enemigos);
+    
     // Añadir colisiones entre el jefe y el personaje
     this.physics.add.collider(this.boss, this.personaje, () => {
       // Esta función se llama cuando el jefe colisiona con el personaje
@@ -81,7 +80,7 @@ export default class Game extends Phaser.Scene {
     this.isAttacking = false;
     this.space.on("down", () => {
       this.isAttacking = true;
-      // Aquí puedes agregar la animación de ataque cuando esté lista
+      // Aca agregar la animación de ataque cuando esté lista
     });
     this.space.on("up", () => {
       this.isAttacking = false;
@@ -113,7 +112,7 @@ export default class Game extends Phaser.Scene {
 
     // Aumentar la velocidad del jefe gradualmente hasta que alcance la velocidad máxima
     if (this.bossSpeed < this.maxSpeed) {
-      // Incrementar la velocidad en 1 (o el valor que desees para controlar la aceleración)
+      // Incrementar la velocidad del jefe
       this.bossSpeed += 0.02;
     }
 
@@ -131,7 +130,7 @@ export default class Game extends Phaser.Scene {
           this.enemyScore.enemigo.count++;
           this.scoreText.setText(`Score: ${this.score}`); // Actualiza el texto de la puntuación
         } else {
-          this.gameOver = true; // Termina el juego o reduce la vida del personaje
+          this.gameOver = true; // Termina el juego 
         }
       }
     );

@@ -15,7 +15,7 @@ export default class End extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add.text(365, 350, `Score: ${this.score}`);
-    //this.scoreText.setText(`Puntuación: ${this.score}`)
+
     this.add.text(320, 400, "Press R to Restart");
 
     this.r = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);

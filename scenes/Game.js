@@ -95,20 +95,29 @@ export default class Game extends Phaser.Scene {
   }
 
   update() {
+    let velocityX = 0;
+    let velocityY = 0;
+
     if (this.a.isDown) {
-      this.personaje.setVelocityX(-160);
+        velocityX = -160;
     } else if (this.d.isDown) {
-      this.personaje.setVelocityX(160);
-    } else {
-      this.personaje.setVelocityX(0);
+        velocityX = 160;
     }
+
     if (this.w.isDown) {
-      this.personaje.setVelocityY(-160);
+        velocityY = -160;
     } else if (this.s.isDown) {
-      this.personaje.setVelocityY(160);
-    } else {
-      this.personaje.setVelocityY(0);
+        velocityY = 160;
     }
+
+    // Si ambas velocidades son diferentes de 0, normaliza para que la velocidad total no exceda 160
+    if (velocityX !== 0 && velocityY !== 0) {
+        velocityX *= Math.SQRT1_2; // Math.SQRT1_2 es aproximadamente 1 / √2
+        velocityY *= Math.SQRT1_2;
+    }
+
+    this.personaje.setVelocityX(velocityX);
+    this.personaje.setVelocityY(velocityY);
 
     // Aumentar la velocidad del jefe gradualmente hasta que alcance la velocidad máxima
     if (this.bossSpeed < this.maxSpeed) {

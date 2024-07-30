@@ -10,6 +10,7 @@ export default class Game extends Phaser.Scene {
       enemigo: { points: 10, count: 0 }
     };
     this.currentAnimation = 'walk-down'; // Variable para almacenar la animación actual
+    this.powerUpDuration = 4000; // Duración del efecto del power-up (en ms)
   }
 
   preload() {
@@ -34,8 +35,8 @@ export default class Game extends Phaser.Scene {
     //boss
     this.load.image("boss", "./public/assets/dinopixel.png");
 
-    //wingboots
-    this.load.image("boots", "./public/assets/spr_wingboots.gif")
+    //powerup
+    this.load.image("powerup", "./public/assets/egg.png")
 
 
     }
@@ -167,6 +168,22 @@ export default class Game extends Phaser.Scene {
       fontSize: "32px",
       fill: "#000",
     });
+
+ // Grupo de power-ups
+ this.powerUps = this.physics.add.group();
+
+ // Evento de temporizador para generar power-ups cada 10 segundos
+ this.time.addEvent({
+   delay: 20000, // 10 segundos
+   callback: this.spawnPowerUp,
+   callbackScope: this,
+   loop: true,
+ });
+
+ // Añadir colisiones entre el personaje y los power-ups
+ this.physics.add.overlap(this.personaje, this.powerUps, this.collectPowerUp, null, this);
+
+    
   }
 
   update() {
@@ -290,5 +307,16 @@ export default class Game extends Phaser.Scene {
       this.physics.moveToObject(enemigo, this.personaje, this.enemySpeed);
       console.log(this.personaje);
     }, this);
+  }
+  spawnPowerUp() {
+    const x = Phaser.Math.Between(0, 800);
+    const y = Phaser.Math.Between(0, 600);
+    const powerUp = this.powerUps.create(x, y, "powerup");
+    powerUp.setScale(3); // Ajusta el tamaño del power-up si es necesario
+  }
+  collectPowerUp(personaje, powerUp) {
+    powerUp.destroy(); // Destruye el power-up
+    this.score += 1000; // Aumenta la puntuación en 1000 puntos
+    this.scoreText.setText(`Score: ${this.score}`); // Actualiza el texto de la puntuación
   }
 }

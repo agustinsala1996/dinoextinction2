@@ -7,24 +7,38 @@ export default class Game extends Phaser.Scene {
     this.gameOver = false;
     this.score = 0;
     this.enemyScore = {
-      enemigo: { points: 10, count: 0 },
-      boss: { points: 100, count: 0 },
+      enemigo: { points: 10, count: 0 }
     };
+    this.currentAnimation = 'walk-down'; // Variable para almacenar la animación actual
   }
 
   preload() {
     //fondo
-    this.load.image("fondo", "./public/assets/fondo.png");
+    this.load.image("fondo", "./public/assets/graybackground.png");
 
     //personaje 
-    this.load.image("personaje", "./public/assets/tercero.png");
+    //this.load.image("personaje", "./public/assets/tercero.png");
+    this.load.spritesheet("personaje", "./public/assets/charactersheet.png", {
+      frameWidth: 16,
+      frameHeight: 32,
+    });
+
+    this.load.spritesheet("ataques", "./public/assets/charactersheet.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
 
     //enemigo
-    this.load.image("enemigo", "./public/assets/enemigo.png");
+    this.load.image("enemigo", "./public/assets/dinopixel.png");
 
     //boss
-    this.load.image("boss", "./public/assets/boss.png");
-  }
+    this.load.image("boss", "./public/assets/dinopixel.png");
+
+    //wingboots
+    this.load.image("boots", "./public/assets/spr_wingboots.gif")
+
+
+    }
 
   create() {
     //fondo
@@ -33,9 +47,70 @@ export default class Game extends Phaser.Scene {
 
     //personaje
     this.personaje = this.physics.add.sprite(400, 300, "personaje");
-    this.personaje.setScale(2);
+    this.personaje.setScale(3);
     this.personaje.setCollideWorldBounds(true);
     this.personaje.body.immovable = true;
+    
+
+    ////prueba
+    // Define animaciones para el personaje
+  this.anims.create({
+    key: 'walk-left',
+    frames: this.anims.generateFrameNumbers('personaje', { start: 51, end: 54}),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'walk-right',
+    frames: this.anims.generateFrameNumbers('personaje', { start: 17, end: 20 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'walk-up',
+    frames: this.anims.generateFrameNumbers('personaje', { start: 34, end: 37 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'walk-down',
+    frames: this.anims.generateFrameNumbers('personaje', { start: 0, end: 3 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  //attack anims
+  this.anims.create({
+    key: 'attack-left',
+    frames: this.anims.generateFrameNumbers('ataques', { start: 56, end: 59 }),
+    frameRate: 10,
+    repeat: -1,
+    
+  });
+  this.anims.create({
+    key: 'attack-right',
+    frames: this.anims.generateFrameNumbers('ataques', { start: 48, end: 51 }),
+    frameRate: 10,
+    repeat: -1
+  });
+  this.anims.create({
+    key: 'attack-up',
+    frames: this.anims.generateFrameNumbers('ataques', { start: 40, end: 43}),
+    frameRate: 10,
+    repeat: -1
+  });
+  this.anims.create({
+    key: 'attack-down',
+    frames: this.anims.generateFrameNumbers('ataques', { start: 32 , end: 35 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  // Iniciar con la animación de caminar hacia abajo o la que sea apropiada
+  this.personaje.play('walk-down');
 
     //grupo de enemigos
     this.enemigos = this.physics.add.group();
@@ -85,12 +160,12 @@ export default class Game extends Phaser.Scene {
     this.space.on("up", () => {
       this.isAttacking = false;
     });
-    this.enemySpeed = 80;
+    this.enemySpeed = 60;
     this.bossSpeed = 20;
-    this.maxSpeed = 80;
+    this.maxSpeed = 160;
     this.scoreText = this.add.text(16, 16, "Score: 0", {
       fontSize: "32px",
-      fill: "#FFF",
+      fill: "#000",
     });
   }
 
@@ -98,52 +173,103 @@ export default class Game extends Phaser.Scene {
     let velocityX = 0;
     let velocityY = 0;
 
+    // Verifica si la tecla SPACE está presionada
+    let isAttacking = this.space.isDown;
+
+    // Verifica si una tecla de movimiento está presionada
+    let moving = false;
+
+    // Movimiento horizontal
     if (this.a.isDown) {
         velocityX = -160;
+        moving = true;
+        if (isAttacking) {
+            this.personaje.play('attack-left', true);
+        } else {
+            this.personaje.play('walk-left', true);
+        }
     } else if (this.d.isDown) {
         velocityX = 160;
+        moving = true;
+        if (isAttacking) {
+            this.personaje.play('attack-right', true);
+        } else {
+            this.personaje.play('walk-right', true);
+        }
     }
 
-    if (this.w.isDown) {
-        velocityY = -160;
-    } else if (this.s.isDown) {
-        velocityY = 160;
+    // Movimiento vertical, solo si no hay movimiento horizontal
+    if (!moving) {
+        if (this.w.isDown) {
+            velocityY = -160;
+            if (isAttacking) {
+                this.personaje.play('attack-up', true);
+            } else {
+                this.personaje.play('walk-up', true);
+            }
+        } else if (this.s.isDown) {
+            velocityY = 160;
+            if (isAttacking) {
+                this.personaje.play('attack-down', true);
+            } else {
+                this.personaje.play('walk-down', true);
+            }
+        }
     }
 
-    // Si ambas velocidades son diferentes de 0, normaliza para que la velocidad total no exceda 160
-    if (velocityX !== 0 && velocityY !== 0) {
-        velocityX *= Math.SQRT1_2; // Math.SQRT1_2 es aproximadamente 1 / √2
-        velocityY *= Math.SQRT1_2;
+    // Detener la animación si el personaje no se mueve
+    if (velocityX === 0 && velocityY === 0) {
+        if (!isAttacking) {
+            this.personaje.anims.stop();
+        }
     }
 
     this.personaje.setVelocityX(velocityX);
     this.personaje.setVelocityY(velocityY);
-
+    
     // Aumentar la velocidad del jefe gradualmente hasta que alcance la velocidad máxima
     if (this.bossSpeed < this.maxSpeed) {
-      // Incrementar la velocidad del jefe
-      this.bossSpeed += 0.02;
+        this.bossSpeed += 0.022;
+
+        let proportion = this.bossSpeed / this.maxSpeed;
+        let red = Math.floor(255 * proportion);
+        let green = 255 - red;
+        let tint = (red << 16) + (green << 8);
+        this.boss.setTint(tint);
     }
 
     this.bossSpeed = Math.min(this.bossSpeed, this.maxSpeed);
     this.physics.moveToObject(this.boss, this.personaje, this.bossSpeed);
 
-    // Verificar colisiones para ataque melee
-    this.physics.world.overlap(
-      this.personaje,
-      this.enemigos,
-      (personaje, enemigo) => {
-        if (this.isAttacking) {
-          enemigo.destroy(); // Elimina al enemigo si el personaje está atacando
-          this.score += this.enemyScore.enemigo.points; // Aumenta la puntuación
-          this.enemyScore.enemigo.count++;
-          this.scoreText.setText(`Score: ${this.score}`); // Actualiza el texto de la puntuación
-        } else {
-          this.gameOver = true; // Termina el juego 
+    if (this.boss.body.velocity.x < 0) {
+        this.boss.setFlipX(true);
+    } else if (this.boss.body.velocity.x > 0) {
+        this.boss.setFlipX(false);
+    }
+
+    this.enemigos.getChildren().forEach((enemigo) => {
+        if (enemigo.body.velocity.x < 0) {
+            enemigo.setFlipX(true);
+        } else if (enemigo.body.velocity.x > 0) {
+            enemigo.setFlipX(false);
         }
-      }
+    });
+
+    this.physics.world.overlap(
+        this.personaje,
+        this.enemigos,
+        (personaje, enemigo) => {
+            if (this.isAttacking) {
+                enemigo.destroy();
+                this.score += this.enemyScore.enemigo.points;
+                this.enemyScore.enemigo.count++;
+                this.scoreText.setText(`Score: ${this.score}`);
+            } else {
+                this.gameOver = true;
+            }
+        }
     );
-  }
+}
 
   onSecond() {
     const posX = Phaser.Math.Between(0, 800);
